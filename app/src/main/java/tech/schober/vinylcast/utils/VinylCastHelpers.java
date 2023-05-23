@@ -15,7 +15,6 @@ import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.text.format.Formatter;
 import android.util.Pair;
 
 import androidx.media.session.MediaButtonReceiver;
@@ -26,6 +25,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 
 import tech.schober.vinylcast.R;
 import tech.schober.vinylcast.VinylCastService;
@@ -106,9 +110,23 @@ public class VinylCastHelpers {
         return intent;
     }
 
-    public static String getIpAddress(Context context) {
+    public static String getIpAddress(Context context) throws SocketException {
         WifiManager wm = (WifiManager) context.getSystemService(WIFI_SERVICE);
-        return Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+        Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
+        NetworkInterface ni;
+        while (nis.hasMoreElements()) {
+            ni = nis.nextElement();
+            if (!ni.isLoopback() && ni.isUp()/*it works now*/) {
+                for (InterfaceAddress ia : ni.getInterfaceAddresses()) {
+                    //filter for ipv4/ipv6
+                    if (ia.getAddress().getAddress().length == 4) {
+                        //4 for ipv4, 16 for ipv6
+                        return ia.getAddress().toString();
+                    }
+                }
+            }
+        }
+        return "0.0.0.0";
     }
 
     public static int getSharedPreferenceStringAsInteger(Context context, int prefsKeyResId, int prefsDefaultResId) {

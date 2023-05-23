@@ -4,7 +4,6 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.ajoberstar.grgit:grgit-gradle:4.0.2'
     }
 }
 
@@ -22,17 +21,6 @@ android.applicationVariants.all { variant ->
     }
 }
 
-// use grgit to determine versionCode and versionName
-ext {
-    git = org.ajoberstar.grgit.Grgit.open()
-    gitVersionCode = git.tag.list().size()
-    gitVersionName = "${git.describe(tags: true)}"
-}
-
-task printVersion() {
-    println("Version Name: $gitVersionName")
-    println("Version Code: $gitVersionCode")
-}
 
 android {
     compileSdkVersion 29
@@ -40,8 +28,7 @@ android {
         applicationId 'tech.schober.vinylcast'
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode gitVersionCode
-        versionName gitVersionName
+        versionName 'vinylcast'
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         }
@@ -77,7 +64,7 @@ android {
             dimension "destination"
             applicationId 'tech.schober.vinylcast.playstore'
             versionNameSuffix "-playstore"
-            dynamicFeatures = [":audio_acr"]
+            //dynamicFeatures = [":audio_acr"]
             firebaseCrashlytics {
                 // Enable processing and uploading of native symbols to Crashlytics
                 // servers. By default, this is disabled to improve build speeds.
@@ -98,6 +85,7 @@ android {
         targetCompatibility = 1.8
     }
     buildToolsVersion = '29.0.3'
+    ndkVersion '20.0.5594570'
 }
 
 dependencies {
